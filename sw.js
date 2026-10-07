@@ -2,7 +2,8 @@
 // Same-origin files and the Google Fonts are served from cache first and refreshed in the background,
 // so a new deploy shows up the second time the app is opened.
 
-const CACHE = 'prompter-v1';
+// Bump this to make every device drop its cached copy and reload with the new one right away.
+const CACHE = 'prompter-v2';
 const SHELL = [
   './',
   'manifest.webmanifest',
@@ -21,7 +22,7 @@ const SHELL = [
 ];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL.map(url => new Request(url, { cache: 'reload' })))).then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', e => {
@@ -42,7 +43,8 @@ self.addEventListener('fetch', e => {
   e.respondWith(caches.open(CACHE).then(async cache => {
     const key = req.mode === 'navigate' ? './' : req;
     const hit = await cache.match(key);
-    const fresh = fetch(req).then(res => {
+    // no-cache: check with the server each time, or the host's 10-minute browser cache hides new deploys
+    const fresh = fetch(req, sameOrigin ? { cache: 'no-cache' } : undefined).then(res => {
       if (res.ok) cache.put(key, res.clone());
       return res;
     });

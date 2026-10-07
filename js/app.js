@@ -391,6 +391,10 @@ async function boot() {
   navigator.storage?.persist?.();
   // On localhost the service worker is opt-in (?sw) so edits show up on reload.
   if ('serviceWorker' in navigator && (!/^(localhost|127\.0\.0\.1)$/.test(location.hostname) || location.search.includes('sw'))) {
+    // A new service worker version taking over means a new deploy: reload once to show it.
+    if (navigator.serviceWorker.controller) {
+      navigator.serviceWorker.addEventListener('controllerchange', () => location.reload(), { once: true });
+    }
     navigator.serviceWorker.register('sw.js').catch(console.error);
     cacheFonts();
   }
