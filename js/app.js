@@ -166,6 +166,16 @@ function showRaw(script) {
 function wireLibrary() {
   $('openSettings').onclick = () => { location.hash = '#/settings'; };
 
+  // Full screen for when the app runs in a browser tab. An installed app already has no address bar.
+  const fs = $('fullscreen');
+  const syncFs = () => {
+    fs.hidden = !document.documentElement.requestFullscreen || (isInstalled() && !document.fullscreenElement);
+    fs.textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen';
+  };
+  fs.onclick = () => attempt(() => document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen());
+  document.addEventListener('fullscreenchange', syncFs);
+  syncFs();
+
   $('addDrive').onclick = () => attempt(async () => {
     if (!drive.configured()) return toast('Google sign-in isn’t set up yet. See “Google setup” in the README.');
     if (!navigator.onLine) return toast('You’re offline. Connect to add a script from Drive.');

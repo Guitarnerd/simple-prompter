@@ -3,7 +3,7 @@
 // so a new deploy shows up the second time the app is opened.
 
 // Bump this to make every device drop its cached copy and reload with the new one right away.
-const CACHE = 'prompter-v2';
+const CACHE = 'prompter-v3';
 const SHELL = [
   './',
   'manifest.webmanifest',
