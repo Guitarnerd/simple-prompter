@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Simple Prompter</title>
+<meta name="theme-color" content="#0b0d0c">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Prompter">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" crossorigin href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=Press+Start+2P&display=swap">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+<!-- Library (home) -->
+<main id="library" class="page" hidden>
+  <div class="wrap">
+    <header class="head">
+      <h1>Simple Prompter</h1>
+      <button id="openSettings" type="button">Settings</button>
+    </header>
+    <div class="adders">
+      <button id="addDrive" type="button" class="primary">Add from Google Drive</button>
+      <button id="addLink" type="button">Paste link</button>
+      <button id="addText" type="button">Paste text</button>
+    </div>
+    <p id="googleNote" class="note" hidden></p>
+    <ul id="scripts" class="scripts"></ul>
+    <p id="empty" class="note" hidden>No scripts yet. Add one above.</p>
+  </div>
+</main>
+
+<!-- Settings -->
+<main id="settings" class="page" hidden>
+  <div class="wrap">
+    <header class="head">
+      <h1>Settings</h1>
+      <button id="closeSettings" type="button">Done</button>
+    </header>
+
+    <section>
+      <h2>Prompter</h2>
+      <label class="row" for="setSpeed">Scroll speed <input id="setSpeed" type="range" min="5" max="200"><output id="setSpeedOut"></output></label>
+      <label class="row" for="setSize">Text size <input id="setSize" type="range" min="28" max="120"><output id="setSizeOut"></output></label>
+      <label class="row" for="setGuide">Guide line position <input id="setGuide" type="range" min="15" max="60"><output id="setGuideOut"></output></label>
+      <label class="row check" for="setMirrorH"><input id="setMirrorH" type="checkbox"> Mirror left to right</label>
+      <label class="row check" for="setMirrorV"><input id="setMirrorV" type="checkbox"> Flip top to bottom</label>
+    </section>
+
+    <section>
+      <h2>Speaker colors</h2>
+      <div id="colorList"></div>
+      <p id="noSpeakers" class="note" hidden>Speakers show up here once a script has them.</p>
+    </section>
+
+    <section>
+      <h2>Remote</h2>
+      <p class="note">Pair a Bluetooth remote or keyboard with this device, then choose what each button does.</p>
+      <button id="openRemote" type="button">Remote setup</button>
+    </section>
+
+    <section>
+      <h2>Google account</h2>
+      <p id="googleStatus" class="note"></p>
+      <button id="signOut" type="button" hidden>Sign out of Google</button>
+    </section>
+
+    <section>
+      <h2>This device</h2>
+      <p id="wakeStatus" class="note"></p>
+      <p id="storageStatus" class="note"></p>
+      <button id="openIntro" type="button">How to install</button>
+      <p id="version" class="note"></p>
+    </section>
+  </div>
+</main>
+
+<!-- First run / install help -->
+<main id="intro" class="page" hidden>
+  <div class="wrap">
+    <h1>Simple Prompter</h1>
+    <p class="lead">A teleprompter that reads your scripts from Google Docs and keeps them on this device, so a recording still works when the Wi-Fi doesn't.</p>
+
+    <section id="installBox">
+      <h2>Put it on your home screen</h2>
+      <p id="installed" class="note" hidden>Already installed on this device.</p>
+      <div id="installPrompt" hidden>
+        <p class="note">Installing opens it full-screen, like any other app.</p>
+        <button id="installBtn" type="button" class="primary">Install app</button>
+      </div>
+      <ol id="installIOS" class="steps" hidden>
+        <li>Open this page in <strong>Safari</strong>.</li>
+        <li>Tap the <strong>Share</strong> button
+          <svg class="shareicon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3m0 0L8 7m4-4 4 4M6 10H5a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1h-1" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          in the toolbar.</li>
+        <li>Scroll down and tap <strong>Add to Home Screen</strong>, then <strong>Add</strong>.</li>
+        <li>Open <strong>Prompter</strong> from the home screen.</li>
+      </ol>
+      <ol id="installOther" class="steps" hidden>
+        <li><strong>Android (Chrome):</strong> tap the ⋮ menu, then <strong>Add to Home screen</strong> or <strong>Install app</strong>.</li>
+        <li><strong>Windows or Mac (Chrome, Edge):</strong> click the install icon at the right end of the address bar.</li>
+      </ol>
+    </section>
+
+    <button id="introDone" type="button" class="primary">Open the library</button>
+  </div>
+</main>
+
+<!-- Prompter -->
+<div id="prompter" hidden>
+  <div id="view">
+    <div id="stage"><div id="script"></div></div>
+    <div id="guide" aria-hidden="true"></div>
+  </div>
+  <div id="bar">
+    <button id="back" type="button">Library</button>
+    <button id="play" type="button">Play</button>
+    <button id="top" type="button">Restart</button>
+    <label for="speed">Speed <input id="speed" type="range" min="5" max="200"><output id="speedOut"></output></label>
+    <label for="size">Text <input id="size" type="range" min="28" max="120"><output id="sizeOut"></output></label>
+    <button id="mirror" type="button" aria-pressed="false">Mirror</button>
+    <button id="cues" type="button" aria-pressed="true">Cues on</button>
+    <label for="hl">Highlight <select id="hl"></select></label>
+    <button id="refresh" type="button" hidden>Refresh</button>
+    <div id="keys">Space play/pause · ↑ ↓ speed · Page Up/Down jump · + − text size · R restart</div>
+  </div>
+</div>
+
+<!-- Remote setup -->
+<div id="remote" hidden>
+  <div class="rp-head"><strong>Remote setup</strong><button id="rpClose" type="button">Done</button></div>
+  <p class="rp-note">Pair the remote with this device over Bluetooth, then press any button on it. If a key name shows up below, the app can hear it. To change what a button does, tap an action's Assign button, then press the remote button.</p>
+  <div class="rp-last">Last button: <span id="lastKey">none yet</span></div>
+  <div id="rpList"></div>
+  <button id="rpReset" type="button">Reset to defaults</button>
+</div>
+
+<dialog id="dlgText">
+  <form method="dialog">
+    <h2>Paste text</h2>
+    <p class="note">Copy the script out of Google Docs and paste it here.</p>
+    <label for="textTitle">Title</label>
+    <input id="textTitle" type="text" autocomplete="off" placeholder="Taken from the first heading if left blank">
+    <label for="textBody">Script</label>
+    <textarea id="textBody" rows="10" spellcheck="false"></textarea>
+    <div class="actions">
+      <button type="submit" value="cancel">Cancel</button>
+      <button type="submit" value="ok" class="primary">Add script</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dlgLink">
+  <form method="dialog">
+    <h2>Paste link</h2>
+    <p class="note">In Google Docs, set Share to "Anyone with the link can view," then paste the link here. No sign-in needed.</p>
+    <label for="linkUrl">Google Docs link</label>
+    <input id="linkUrl" type="url" autocomplete="off" placeholder="https://docs.google.com/document/d/…">
+    <div class="actions">
+      <button type="submit" value="cancel">Cancel</button>
+      <button type="submit" value="ok" class="primary">Add script</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dlgRaw">
+  <form method="dialog">
+    <h2 id="rawTitle">Raw text</h2>
+    <p class="note">The text exactly as it came from the source. Useful when a line shows up in the wrong color.</p>
+    <pre id="rawBody"></pre>
+    <div class="actions"><button type="submit" class="primary">Close</button></div>
+  </form>
+</dialog>
+
+<div id="toast" role="status" hidden></div>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
